@@ -58,7 +58,10 @@
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QLabel>
 #include <QFileInfo>
+#include <QDir>
+#include <QDirIterator>
 #include <QStandardPaths>
 #include <QSettings>
 #include <QDebug>
@@ -68,10 +71,8 @@ MainWindow::MainWindow(QWidget* parent)
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
-    mainLayout->setStretch(0,0);
-    mainLayout->setStretch(1,1);
-
     QWidget* wControl = new QWidget;
+
     QWidget* wBoard = new QWidget;
 
     QVBoxLayout* controlLayout = new QVBoxLayout(wControl);
@@ -80,8 +81,8 @@ MainWindow::MainWindow(QWidget* parent)
     QHBoxLayout* libraryLayout = new QHBoxLayout;
     wLibrary->setLayout(libraryLayout);
 
+    QLabel* lLibrary = new QLabel("Location to images:");
     m_mediaPathEdit = new QLineEdit(wControl);
-
     QPushButton* bRefresh = new QPushButton("reload");
 
     //    connect(m_mediaPathEdit, &QLineEdit::textEdited, this, [this](){
@@ -97,6 +98,7 @@ MainWindow::MainWindow(QWidget* parent)
         }
     });
 
+    libraryLayout->addWidget(lLibrary);
     libraryLayout->addWidget(m_mediaPathEdit);
     libraryLayout->addWidget(bRefresh);
 
@@ -104,8 +106,11 @@ MainWindow::MainWindow(QWidget* parent)
 
     QHBoxLayout* boardLayout = new QHBoxLayout(wBoard);
 
-    boardLayout->addWidget(new DragWidget);
-    boardLayout->addWidget(new DragWidget);
+    m_leftBoard = new DragWidget;
+    m_rightBoard = new DragWidget;
+
+    boardLayout->addWidget(m_leftBoard);
+    boardLayout->addWidget(m_rightBoard);
 
     mainLayout->addWidget(wControl);
     mainLayout->addWidget(wBoard);
@@ -122,6 +127,9 @@ MainWindow::MainWindow(QWidget* parent)
     );
 
     setWindowTitle(tr("Cards Generator"));
+
+    mainLayout->setStretch(0,0);
+    mainLayout->setStretch(1,1);
 
     __tryRestoreSession();
 }
@@ -161,7 +169,10 @@ void MainWindow::__tryRestoreSession()
 
 void MainWindow::__reloadLibrary()
 {
-    qInfo()<<"load images from"<<m_mediaPathEdit->text();
+    QString path = m_mediaPathEdit->text();
+    qInfo()<<"load images from"<<path;
+    QList<QString> files = __getImageFiles(path);
+    qInfo() << files;
 }
 
 void MainWindow::__updatePathColor(QString& path) const
@@ -171,4 +182,20 @@ void MainWindow::__updatePathColor(QString& path) const
     } else {
         m_mediaPathEdit->setStyleSheet("background: #f37366;");
     }
+}
+
+QList<QString>
+MainWindow::__getImageFiles(const QString& path) const
+{
+    QStringList files;
+
+    QStringList filters;
+    filters << "*.png";
+    filters << "*.jpg";
+
+    QDirIterator it(path, filters, QDir::AllEntries | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        files << it.next();
+    }
+    return std::move(files);
 }
