@@ -48,17 +48,26 @@
 **
 ****************************************************************************/
 
-#include <QApplication>
+#pragma once
 
-#include <mainwindow.hpp>
+#include <QFrame>
 
-int main(int argc, char *argv[])
+QT_BEGIN_NAMESPACE
+class QDragEnterEvent;
+class QDropEvent;
+QT_END_NAMESPACE
+
+//! [0]
+class DragListWidget : public QFrame
 {
-    QApplication app(argc, argv);
-    app.setApplicationName("CardsGenerator");
+public:
+    explicit DragListWidget(QWidget *parent = nullptr);
 
-    MainWindow* window = new MainWindow;
-    window->show();
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+};
+//! [0]
 
-    return app.exec();
-}

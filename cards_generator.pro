@@ -1,10 +1,12 @@
 QT += widgets
 
 HEADERS     = mainwindow.hpp \
-              dragwidget.h
+              dragwidget.hpp \
+              draglistwidget.hpp
 RESOURCES   =
 SOURCES     = mainwindow.cpp \
               dragwidget.cpp \
+              draglistwidget.cpp \
               main.cpp
 
 # install
