@@ -57,17 +57,24 @@ class QDragEnterEvent;
 class QDropEvent;
 QT_END_NAMESPACE
 
-//! [0]
+class Card;
+
 class DragListWidget : public QFrame
 {
 public:
     explicit DragListWidget(QWidget *parent = nullptr);
+    void fill(const QList<QString>&);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+
+private:
+    QList<Card*> m_cards;
+
+    void __reset();
 };
-//! [0]
+
 

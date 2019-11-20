@@ -49,7 +49,8 @@
 ****************************************************************************/
 
 #include <mainwindow.hpp>
-#include "dragwidget.h"
+#include "draglistwidget.hpp"
+#include "dragwidget.hpp"
 
 #include <QApplication>
 #include <QStyle>
@@ -106,7 +107,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     QHBoxLayout* boardLayout = new QHBoxLayout(wBoard);
 
-    m_leftBoard = new DragWidget;
+    m_leftBoard = new DragListWidget;
     m_rightBoard = new DragWidget;
 
     boardLayout->addWidget(m_leftBoard);
@@ -173,6 +174,7 @@ void MainWindow::__reloadLibrary()
     qInfo()<<"load images from"<<path;
     QList<QString> files = __getImageFiles(path);
     qInfo() << files;
+    m_leftBoard->fill(files);
 }
 
 void MainWindow::__updatePathColor(QString& path) const

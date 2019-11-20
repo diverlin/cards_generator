@@ -50,6 +50,7 @@
 
 #include <QtWidgets>
 
+#include <card.hpp>
 #include "draglistwidget.hpp"
 
 //! [0]
@@ -80,6 +81,24 @@ DragListWidget::DragListWidget(QWidget *parent)
     houseIcon->setAttribute(Qt::WA_DeleteOnClose);
 }
 //! [0]
+
+void DragListWidget::__reset()
+{
+    for (QLabel* label: m_cards) {
+        delete label;
+    }
+    m_cards.clear();
+}
+
+void DragListWidget::fill(const QList<QString>& files)
+{
+    __reset();
+
+    for (const QString& file: files) {
+        Card* card = new Card(file, this);
+        m_cards.push_back(card);
+    }
+}
 
 void DragListWidget::dragEnterEvent(QDragEnterEvent *event)
 {

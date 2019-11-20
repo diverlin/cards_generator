@@ -3,6 +3,7 @@
 #include <QWidget>
 
 class QLineEdit;
+class DragListWidget;
 class DragWidget;
 
 class MainWindow : public QWidget {
@@ -13,7 +14,7 @@ public:
 
 private:
     QLineEdit* m_mediaPathEdit = nullptr;
-    DragWidget* m_leftBoard = nullptr;
+    DragListWidget* m_leftBoard = nullptr;
     DragWidget* m_rightBoard = nullptr;
 
     void __tryRestoreSession();

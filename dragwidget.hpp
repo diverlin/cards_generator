@@ -48,14 +48,14 @@
 **
 ****************************************************************************/
 
-#ifndef DRAGWIDGET_H
-#define DRAGWIDGET_H
+#pragma once
 
 #include <QFrame>
 
 QT_BEGIN_NAMESPACE
 class QDragEnterEvent;
 class QDropEvent;
+class QLabel;
 QT_END_NAMESPACE
 
 //! [0]
@@ -64,12 +64,18 @@ class DragWidget : public QFrame
 public:
     explicit DragWidget(QWidget *parent = nullptr);
 
+    void addMagnit();
+    void removemagnit();
+
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+
+private:
+    QList<QLabel*> m_magnits;
 };
 //! [0]
 
-#endif // DRAGWIDGET_H
+
