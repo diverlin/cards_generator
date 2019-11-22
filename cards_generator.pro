@@ -22,4 +22,11 @@ SOURCES     = mainwindow.cpp \
 
 
 
-
+win32|win64 {
+    CONFIG(release, debug|release) {
+        DEFINES += QT_NO_DEBUG_OUTPUT
+        CONFIG += static # link qt libs statically
+        LIBS += -static # link rest libs statically
+        #QTPLUGIN += qwindows
+    }
+}
