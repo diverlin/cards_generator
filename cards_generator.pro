@@ -1,20 +1,23 @@
 QT += widgets
 
 HEADERS     = mainwindow.hpp \
-              dragwidget.hpp \
+              cardboard.hpp \
               imagespoolwidget.hpp \
               imagewidget.hpp \
               colors.hpp \
+              overlaylabel.hpp \
               utils.hpp \
 
-RESOURCES   =
+RESOURCES   = \
+    cards_generator.qrc
 
 SOURCES     = mainwindow.cpp \
-              dragwidget.cpp \
+              cardboard.cpp \
               imagespoolwidget.cpp \
               utils.cpp \
               imagewidget.cpp \
               colors.cpp \
+              overlaylabel.cpp \
               main.cpp
 
 

@@ -35,7 +35,7 @@ void ImagesPoolWidget::fill(const QList<QString>& files)
     ImageWidget* prevCardInRow = nullptr;
 
     for (const QString& file: files) {
-        ImageWidget* card = new ImageWidget(file, this);
+        ImageWidget* card = new ImageWidget(file, 1.0f, this);
 
         int card_width = card->width();
         int card_height = card->height();

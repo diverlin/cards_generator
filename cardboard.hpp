@@ -50,7 +50,7 @@
 
 #pragma once
 
-#include <QFrame>
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 class QDragEnterEvent;
@@ -58,14 +58,29 @@ class QDropEvent;
 class QLabel;
 QT_END_NAMESPACE
 
-//! [0]
-class DragWidget : public QFrame
-{
-public:
-    explicit DragWidget(QWidget *parent = nullptr);
+class ImageWidget;
+class OverlayLabel;
 
-    void addMagnit();
-    void removemagnit();
+class CardBoard : public QLabel
+{
+    Q_OBJECT
+public:
+    explicit CardBoard(OverlayLabel* overlay, QWidget *parent);
+    ~CardBoard();
+
+    void reset();
+    void save();
+    void gen(const QList<QString>& pack);
+    void applyScaleFactor(float factor);
+    void applyBackground(const QString& path);
+    void removeBackground();
+
+    void applyForeground(const QString& path, bool skipDirtyFlag = false);
+    void removeForeground();
+
+signals:
+    void dirty();
+    void saved(const QString&);
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -74,8 +89,12 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
 
 private:
-    QList<QLabel*> m_magnits;
+    float m_scaleFactor = 1.0f;
+    QString m_foregroundPath;
+
+    OverlayLabel* m_overlay = nullptr;
+
+    void __markDirty();
 };
-//! [0]
 
 

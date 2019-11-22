@@ -5,10 +5,10 @@
 class ImageWidget : public QLabel {
     Q_OBJECT
 public:
-    ImageWidget(const QString& imagePath, QWidget* parent = nullptr);
+    ImageWidget(const QString& imagePath, float scale = 1.0f, QWidget* parent = nullptr);
     virtual ~ImageWidget();
 
-    void scale(float factor);
+    void applyScale(float factor);
 
 private:
     QSize m_size;

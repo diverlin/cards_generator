@@ -5,13 +5,13 @@
 #include <QVariant>
 #include <QGraphicsDropShadowEffect>
 
-ImageWidget::ImageWidget(const QString& imagePath, QWidget* parent)
+ImageWidget::ImageWidget(const QString& imagePath, float scale, QWidget* parent)
     :
       QLabel(parent)
     , m_imagePath(imagePath)
 {
-    scale(1.0f);
-    setStyleSheet(QString("border: 3x solid %1; border-radius: 8px;").arg(COLOR_DARK.name()));
+    applyScale(scale);
+    setStyleSheet(QString("border: 3px solid %1; border-radius: 8px;").arg(COLOR_DARK.name()));
 
     setProperty("imagePath", imagePath);
 
@@ -29,15 +29,22 @@ ImageWidget::~ImageWidget()
 
 }
 
-void ImageWidget::scale(float factor)
+void ImageWidget::applyScale(float factor)
 {
     QPixmap pixmapOrig(m_imagePath);
     float ratio = pixmapOrig.width()/float(pixmapOrig.height());
+    QSize prevSize = m_size;
     m_size = QSize(factor*ratio*100, factor*100);
 
     QPixmap pixmapMini = pixmapOrig.scaled(m_size);
     setPixmap(pixmapMini);
     setFixedSize(m_size);
+
+    QSize deltaSize = prevSize - m_size;
+    QPoint pos(x(), y());
+    pos.setX(pos.x() + deltaSize.width()/2);
+    pos.setY(pos.y() + deltaSize.height()/2);
+    move(pos);
 }
 
 
