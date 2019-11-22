@@ -17,6 +17,6 @@ SOURCES     = mainwindow.cpp \
               colors.cpp \
               main.cpp
 
-# install
-#target.path = $$[QT_INSTALL_EXAMPLES]/widgets/draganddrop/draggableicons
-#INSTALLS += target
+
+
+

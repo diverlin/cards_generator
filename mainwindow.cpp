@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QTimer>
+#include <QCheckBox>
 
 MainWindow::MainWindow(QWidget* parent)
     : QWidget(parent)
@@ -46,6 +47,7 @@ MainWindow::MainWindow(QWidget* parent)
     QWidget* wLeftPaneControl = new QWidget;
     QWidget* wRightPaneControl = new QWidget;
 
+    /// leftPaneControlLayout
     QVBoxLayout* leftPaneControlLayout = new QVBoxLayout(wLeftPaneControl);
     compactLayout(leftPaneControlLayout);
 
@@ -54,50 +56,98 @@ MainWindow::MainWindow(QWidget* parent)
     compactLayout(libraryLayout);
     wLibrary->setLayout(libraryLayout);
 
-    QLabel* lLibrary = new QLabel("Location to images:");
-    m_mediaPathEdit = new QLineEdit(wLeftPaneControl);
-    QPushButton* bRefresh = new QPushButton("reload");
-    QPushButton* bOpen = new QPushButton("open");
+    QLabel* lLibrary = new QLabel(tr("Location to images:"));
+    m_leMediaLibraryPath = new QLineEdit(wLeftPaneControl);
+    m_leMediaLibraryPath->setObjectName("m_leMediaLibraryPath");
+    QPushButton* bRealodLibrary = new QPushButton(tr("Reload"));
+    QPushButton* bOpenMediaPath = new QPushButton(tr("Open"));
 
 //    connect(m_mediaPathEdit, &QLineEdit::textEdited, this, [this](){
 //        qInfo()<<"m_mediaPathEdit"<<m_mediaPathEdit->text();
 //    });
 
-    connect(bOpen, &QPushButton::clicked, this, [this](){
+    connect(bOpenMediaPath, &QPushButton::clicked, this, [this](){
         QString pathCandidate = QFileDialog::getExistingDirectory(this,
                                                              tr("Open Images Location"),
-                                                             __loadLibraryPath());
-        __processNewPath(pathCandidate);
+                                                             __tryLoadExistedPath(m_leMediaLibraryPath->objectName()));
+        __processNewMediaLibraryPath(pathCandidate);
     });
 
-    connect(bRefresh, &QPushButton::clicked, this, [this](){
-        QString pathCandidate = m_mediaPathEdit->text();
-       __processNewPath(pathCandidate);
+    connect(bRealodLibrary, &QPushButton::clicked, this, [this](){
+        QString pathCandidate = m_leMediaLibraryPath->text();
+       __processNewMediaLibraryPath(pathCandidate);
     });
 
     libraryLayout->addWidget(lLibrary);
-    libraryLayout->addWidget(m_mediaPathEdit);
-    libraryLayout->addWidget(bOpen);
-    libraryLayout->addWidget(bRefresh);
+    libraryLayout->addWidget(m_leMediaLibraryPath);
+    libraryLayout->addWidget(bOpenMediaPath);
+    libraryLayout->addWidget(bRealodLibrary);
 
     leftPaneControlLayout->addWidget(wLibrary);
+    /// leftPaneControlLayout
 
-    // controlRightLayout
+    /// controlRightLayout
     QVBoxLayout* controlRightLayout = new QVBoxLayout(wRightPaneControl);
     compactLayout(controlRightLayout);
 
+    QFrame* wCardFrame = new QFrame;
+    QHBoxLayout* cardFrameLayout = new QHBoxLayout;
+    compactLayout(cardFrameLayout);
+    wCardFrame->setLayout(cardFrameLayout);
+
+    QCheckBox* cbUseFrame = new QCheckBox("use frame");
+    cbUseFrame->setChecked(true);
+
+    QLabel* lFrame = new QLabel(tr("Card frame:"));
+    m_leCardFramePath = new QLineEdit(wRightPaneControl);
+    m_leCardFramePath->setObjectName("m_leCardFramePath");
+    QPushButton* bApplyFrame = new QPushButton(tr("Apply"));
+    QPushButton* bOpenFrame = new QPushButton(tr("Open"));
+
+    connect(cbUseFrame, &QCheckBox::stateChanged, [this, lFrame, bApplyFrame, bOpenFrame](bool state){
+        QList<QWidget*> widgets = {lFrame, m_leCardFramePath, bApplyFrame, bOpenFrame};
+        for (QWidget* widget: widgets) {
+            widget->setEnabled(state);
+        }
+        __refreshCardFrame(m_leCardFramePath->text(), state);
+    });
+
+    connect(bOpenFrame, &QPushButton::clicked, this, [this](){
+        QString pathCandidate = QFileDialog::getExistingDirectory(this,
+                                                             tr("Select Card Frame Image"),
+                                                             __tryLoadExistedPath(m_leCardFramePath->objectName()));
+        __processNewMediaLibraryPath(pathCandidate);
+    });
+
+    cardFrameLayout->addWidget(cbUseFrame);
+    cardFrameLayout->addWidget(lFrame);
+    cardFrameLayout->addWidget(m_leCardFramePath);
+    cardFrameLayout->addWidget(bOpenFrame);
+    cardFrameLayout->addWidget(bApplyFrame);
+
+    controlRightLayout->addWidget(wCardFrame);
+    // controlRightLayout
+
     m_leftBoard = new ImagesPoolWidget;
-    m_rightBoard = new DragWidget;
+    QWidget* wRightBoard = new QWidget;
+
+    DragWidget* card = new DragWidget;
+    QHBoxLayout* cardLayout = new QHBoxLayout;
+    wRightBoard->setLayout(cardLayout);
+    cardLayout->addWidget(card);
+
+    card->setFixedSize(480, 640);
+    card->setStyleSheet("background: yellow;");
 
     QScrollArea* scrollArea = new QScrollArea(this);
-    scrollArea->setBackgroundRole(QPalette::Dark);
     scrollArea->setWidget(m_leftBoard);
 
     leftPaneLayout->addWidget(wLeftPaneControl);
     leftPaneLayout->addWidget(scrollArea);
 
+    wRightPaneControl->setStyleSheet("background: red");
     rightPaneLayout->addWidget(wRightPaneControl);
-    rightPaneLayout->addWidget(m_rightBoard);
+    rightPaneLayout->addWidget(wRightBoard);
 
     resize(QDesktopWidget().availableGeometry(this).size() * 0.8);
 
@@ -129,63 +179,75 @@ MainWindow::~MainWindow()
 {}
 
 
-void MainWindow::__processNewPath(const QString& pathCandidate)
+void MainWindow::__processNewMediaLibraryPath(const QString& pathCandidate)
 {
-    __updatePathColor(pathCandidate);
+    __updateColorBasedOnPathExistance(m_leMediaLibraryPath, pathCandidate);
     if (QFileInfo(pathCandidate).exists()) {
-        if (m_mediaPathEdit->text() != pathCandidate) {
-            m_mediaPathEdit->setText(pathCandidate);
+        if (m_leMediaLibraryPath->text() != pathCandidate) {
+            m_leMediaLibraryPath->setText(pathCandidate);
         }
-        __saveLibraryPath(pathCandidate);
+        __savePath(m_leMediaLibraryPath->objectName(), pathCandidate);
         __reloadLibrary();
     }
 }
 
-QString MainWindow::__loadLibraryPath() const
+void MainWindow::__processNewCardFramePath(const QString& pathCandidate)
+{
+    __updateColorBasedOnPathExistance(m_leCardFramePath, pathCandidate);
+    if (QFileInfo(pathCandidate).exists()) {
+        if (m_leCardFramePath->text() != pathCandidate) {
+            m_leCardFramePath->setText(pathCandidate);
+        }
+        __savePath(m_leCardFramePath->objectName(), pathCandidate);
+//        __reloadCardFrame();
+    }
+}
+
+QString MainWindow::__tryLoadExistedPath(const QString& key) const
 {
     QSettings settings;
-    QString path = settings.value("libraryLocation").toString();
+    QString path = settings.value(key).toString();
     if (!QFileInfo(path).exists()) {
         path = "";
     }
     return path;
 }
 
-void MainWindow::__saveLibraryPath(const QString& path) const
+void MainWindow::__savePath(const QString& key, const QString& path) const
 {
     QSettings settings;
-    settings.setValue("libraryLocation", path);
+    settings.setValue(key, path);
 }
 
 void MainWindow::__tryRestoreSession()
 {
-    QString path = __loadLibraryPath();
+    QString path = __tryLoadExistedPath(m_leMediaLibraryPath->objectName());
     if (!QFileInfo(path).exists()) {
        QStringList pathes = QStandardPaths::standardLocations(QStandardPaths::PicturesLocation);
        if (!pathes.isEmpty()) {
            path = pathes.first();
        }
     }
-    __updatePathColor(path);
-    m_mediaPathEdit->setText(path);
+    __updateColorBasedOnPathExistance(m_leMediaLibraryPath, path);
+    m_leMediaLibraryPath->setText(path);
     __reloadLibrary();
 }
 
 void MainWindow::__reloadLibrary()
 {
-    QString path = m_mediaPathEdit->text();
+    QString path = m_leMediaLibraryPath->text();
     qInfo()<<"load images from"<<path;
     QList<QString> files = __getImageFiles(path);
     qInfo() << files;
     m_leftBoard->fill(files);
 }
 
-void MainWindow::__updatePathColor(const QString& path) const
+void MainWindow::__updateColorBasedOnPathExistance(QWidget* widget, const QString& path) const
 {
     if (QFileInfo(path).exists()) {
-        m_mediaPathEdit->setStyleSheet(QString("background: %1;").arg(COLOR_GREEN.name()));
+        widget->setStyleSheet(QString("background: %1;").arg(COLOR_GREEN.name()));
     } else {
-        m_mediaPathEdit->setStyleSheet(QString("background: %1;").arg(COLOR_RED.name()));
+        widget->setStyleSheet(QString("background: %1;").arg(COLOR_RED.name()));
     }
 }
 
@@ -204,4 +266,9 @@ MainWindow::__getImageFiles(const QString& path) const
         files << it.next();
     }
     return std::move(files);
+}
+
+void MainWindow::__refreshCardFrame(const QString&, bool state)
+{
+    qInfo()<<"__refreshCardFrame"<<state;
 }

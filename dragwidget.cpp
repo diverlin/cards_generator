@@ -102,7 +102,6 @@ void DragWidget::dropEvent(QDropEvent *event)
         QString imagePath;
         dataStream >> pixmap >> offset >> imagePath;
 
-//        QString imagePath =
         ImageWidget *newIcon = new ImageWidget(imagePath, this);
         newIcon->setPixmap(pixmap);
         newIcon->move(event->pos() - offset);
@@ -128,10 +127,11 @@ void DragWidget::mousePressEvent(QMouseEvent *event)
         return;
 
     QPixmap pixmap = *child->pixmap();
+    QString imagePath = child->property("imagePath").toString();
 
     QByteArray itemData;
     QDataStream dataStream(&itemData, QIODevice::WriteOnly);
-    dataStream << pixmap << QPoint(event->pos() - child->pos());
+    dataStream << pixmap << QPoint(event->pos() - child->pos()) << imagePath;
 //! [1]
 
 //! [2]

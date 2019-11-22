@@ -1,6 +1,9 @@
 #include <imagewidget.hpp>
+#include "colors.hpp"
+
 #include <QBitmap>
 #include <QVariant>
+#include <QGraphicsDropShadowEffect>
 
 ImageWidget::ImageWidget(const QString& imagePath, QWidget* parent)
     :
@@ -8,9 +11,17 @@ ImageWidget::ImageWidget(const QString& imagePath, QWidget* parent)
     , m_imagePath(imagePath)
 {
     scale(1.0f);
-    setStyleSheet("border: 6px solid #505050; border-radius: 8px;");
+    setStyleSheet(QString("border: 3x solid %1; border-radius: 8px;").arg(COLOR_DARK.name()));
 
     setProperty("imagePath", imagePath);
+
+    QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect;
+    effect->setBlurRadius(15);
+    effect->setXOffset(5);
+    effect->setYOffset(5);
+    effect->setColor(COLOR_DARK);
+
+    setGraphicsEffect(effect);
 }
 
 ImageWidget::~ImageWidget()

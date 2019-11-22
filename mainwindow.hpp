@@ -13,16 +13,19 @@ public:
     ~MainWindow();
 
 private:
-    QLineEdit* m_mediaPathEdit = nullptr;
+    QLineEdit* m_leMediaLibraryPath = nullptr;
+    QLineEdit* m_leCardFramePath = nullptr;
+
     ImagesPoolWidget* m_leftBoard = nullptr;
-    DragWidget* m_rightBoard = nullptr;
 
     void __tryRestoreSession();
-    QString __loadLibraryPath() const;
-    void __saveLibraryPath(const QString&) const;
+    QString __tryLoadExistedPath(const QString&) const;
+    void __savePath(const QString&, const QString&) const;
     void __reloadLibrary();
-    void __updatePathColor(const QString&) const;
+    void __updateColorBasedOnPathExistance(QWidget*, const QString&) const;
     QList<QString> __getImageFiles(const QString& path) const;
-    void __processNewPath(const QString& pathCandidate);
+    void __processNewMediaLibraryPath(const QString& pathCandidate);
+    void __processNewCardFramePath(const QString& pathCandidate);
+    void __refreshCardFrame(const QString&, bool);
 };
 
