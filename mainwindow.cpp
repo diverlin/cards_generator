@@ -51,6 +51,8 @@
 #include <mainwindow.hpp>
 #include "draglistwidget.hpp"
 #include "dragwidget.hpp"
+#include "colors.hpp"
+#include "utils.hpp"
 
 #include <QApplication>
 #include <QStyle>
@@ -71,15 +73,18 @@ MainWindow::MainWindow(QWidget* parent)
     : QWidget(parent)
 {
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    compactLayout(mainLayout);
 
     QWidget* wControl = new QWidget;
 
     QWidget* wBoard = new QWidget;
 
     QVBoxLayout* controlLayout = new QVBoxLayout(wControl);
+    compactLayout(controlLayout);
 
     QWidget* wLibrary = new QWidget;
     QHBoxLayout* libraryLayout = new QHBoxLayout;
+    compactLayout(libraryLayout);
     wLibrary->setLayout(libraryLayout);
 
     QLabel* lLibrary = new QLabel("Location to images:");
@@ -106,8 +111,9 @@ MainWindow::MainWindow(QWidget* parent)
     controlLayout->addWidget(wLibrary);
 
     QHBoxLayout* boardLayout = new QHBoxLayout(wBoard);
+    compactLayout(boardLayout);
 
-    m_leftBoard = new DragListWidget;
+    m_leftBoard = new DragGridWidget;
     m_rightBoard = new DragWidget;
 
     boardLayout->addWidget(m_leftBoard);
@@ -180,9 +186,9 @@ void MainWindow::__reloadLibrary()
 void MainWindow::__updatePathColor(QString& path) const
 {
     if (QFileInfo(path).exists()) {
-        m_mediaPathEdit->setStyleSheet("background: #41c3aa;");
+        m_mediaPathEdit->setStyleSheet(QString("background: %1;").arg(COLOR_GREEN.name()));
     } else {
-        m_mediaPathEdit->setStyleSheet("background: #f37366;");
+        m_mediaPathEdit->setStyleSheet(QString("background: %1;").arg(COLOR_RED.name()));
     }
 }
 

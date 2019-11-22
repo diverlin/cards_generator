@@ -6,7 +6,7 @@ class Card : public QLabel {
     Q_OBJECT
 public:
     Card(const QString& imagePath, QWidget* parent = nullptr);
-    ~Card();
+    virtual ~Card();
 
     void scale(float factor);
     void applyMask();

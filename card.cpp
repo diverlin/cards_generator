@@ -18,10 +18,11 @@ void Card::scale(float factor)
 {
     QPixmap pixmapOrig(m_imagePath);
     float ratio = pixmapOrig.width()/float(pixmapOrig.height());
-    m_size = QSize(factor*ratio*200, factor*200);
+    m_size = QSize(factor*ratio*100, factor*100);
 
     QPixmap pixmapMini = pixmapOrig.scaled(m_size);
     setPixmap(pixmapMini);
+    setFixedSize(m_size);
 
     applyMask();
 }

@@ -4,6 +4,7 @@ HEADERS     = mainwindow.hpp \
               dragwidget.hpp \
               draglistwidget.hpp \
               card.hpp \
+              colors.hpp \
               utils.hpp \
 
 RESOURCES   =
@@ -13,6 +14,7 @@ SOURCES     = mainwindow.cpp \
               draglistwidget.cpp \
               utils.cpp \
               card.cpp \
+              colors.cpp \
               main.cpp
 
 # install

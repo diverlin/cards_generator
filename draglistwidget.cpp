@@ -53,54 +53,58 @@
 #include <card.hpp>
 #include "draglistwidget.hpp"
 
-//! [0]
-DragListWidget::DragListWidget(QWidget *parent)
+DragGridWidget::DragGridWidget(QWidget *parent)
     : QFrame(parent)
 {
-    setMinimumSize(200, 200);
     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
-    setAcceptDrops(true);
-
-    QLabel *boatIcon = new QLabel(this);
-    boatIcon->setStyleSheet("QLabel {border-radius: 4px;}");
-    boatIcon->setPixmap(QPixmap(":/images/boat.png"));
-    boatIcon->move(10, 10);
-    boatIcon->show();
-    boatIcon->setAttribute(Qt::WA_DeleteOnClose);
-
-    QLabel *carIcon = new QLabel(this);
-    carIcon->setPixmap(QPixmap(":/images/car.png"));
-    carIcon->move(100, 10);
-    carIcon->show();
-    carIcon->setAttribute(Qt::WA_DeleteOnClose);
-
-    QLabel *houseIcon = new QLabel(this);
-    houseIcon->setPixmap(QPixmap(":/images/house.png"));
-    houseIcon->move(10, 80);
-    houseIcon->show();
-    houseIcon->setAttribute(Qt::WA_DeleteOnClose);
+//    setAcceptDrops(true);
 }
-//! [0]
 
-void DragListWidget::__reset()
+void DragGridWidget::__reset()
 {
-    for (QLabel* label: m_cards) {
-        delete label;
+    for (Card* card: m_cards) {
+        card->deleteLater();
     }
     m_cards.clear();
 }
 
-void DragListWidget::fill(const QList<QString>& files)
+void DragGridWidget::fill(const QList<QString>& files)
 {
     __reset();
 
+    QPoint pos(0, 0);
+    int row_height = 0;
+    Card* prevCardInRow = nullptr;
+
     for (const QString& file: files) {
         Card* card = new Card(file, this);
+
+        int card_width = card->width();
+        int card_height = card->height();
+
+        row_height = std::max(row_height, card_height);
+        int counter = m_cards.size();
+        if (pos.x() <= (width() - 1.5*card_width)) {
+            if (prevCardInRow) {
+                pos = QPoint(pos.x() + prevCardInRow->width(), pos.y());
+            }
+        } else {
+            pos = QPoint(0, pos.y()+row_height);
+            row_height = 0;
+            prevCardInRow = nullptr;
+        }
+        card->move(pos);
+
+        qInfo()<<counter<<file<<pos<<size();
+
+        prevCardInRow = card;
+        card->show();
+
         m_cards.push_back(card);
     }
 }
 
-void DragListWidget::dragEnterEvent(QDragEnterEvent *event)
+void DragGridWidget::dragEnterEvent(QDragEnterEvent *event)
 {
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
         if (event->source() == this) {
@@ -114,7 +118,7 @@ void DragListWidget::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void DragListWidget::dragMoveEvent(QDragMoveEvent *event)
+void DragGridWidget::dragMoveEvent(QDragMoveEvent *event)
 {
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
         if (event->source() == this) {
@@ -128,7 +132,7 @@ void DragListWidget::dragMoveEvent(QDragMoveEvent *event)
     }
 }
 
-void DragListWidget::dropEvent(QDropEvent *event)
+void DragGridWidget::dropEvent(QDropEvent *event)
 {
     if (event->mimeData()->hasFormat("application/x-dnditemdata")) {
         QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
@@ -156,7 +160,7 @@ void DragListWidget::dropEvent(QDropEvent *event)
 }
 
 //! [1]
-void DragListWidget::mousePressEvent(QMouseEvent *event)
+void DragGridWidget::mousePressEvent(QMouseEvent *event)
 {
     QLabel *child = static_cast<QLabel*>(childAt(event->pos()));
     if (!child)

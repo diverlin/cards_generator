@@ -59,10 +59,10 @@ QT_END_NAMESPACE
 
 class Card;
 
-class DragListWidget : public QFrame
+class DragGridWidget : public QFrame
 {
 public:
-    explicit DragListWidget(QWidget *parent = nullptr);
+    explicit DragGridWidget(QWidget *parent = nullptr);
     void fill(const QList<QString>&);
 
 protected:
@@ -72,7 +72,7 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
 
 private:
-    QList<Card*> m_cards;
+    std::vector<Card*> m_cards;
 
     void __reset();
 };
