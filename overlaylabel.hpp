@@ -7,10 +7,4 @@ class OverlayLabel : public QLabel {
 public:
     OverlayLabel(QWidget* parent = nullptr);
     ~OverlayLabel();
-
-signals:
-    void dirty();
-
-protected:
-    void moveEvent(QMoveEvent*) override final;
 };

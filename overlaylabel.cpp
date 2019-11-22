@@ -11,8 +11,3 @@ OverlayLabel::~OverlayLabel()
 
 }
 
-void OverlayLabel::moveEvent(QMoveEvent* event)
-{
-//    emit dirty();
-//    QLabel::moveEvent(event);
-}

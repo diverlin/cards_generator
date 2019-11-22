@@ -10,13 +10,6 @@ CardBoard::CardBoard(OverlayLabel* overlay, QWidget *parent)
 {
     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     setAcceptDrops(true);
-
-    connect(m_overlay, &OverlayLabel::dirty, [this](){
-        if (!m_foregroundPath.isEmpty() && m_overlay->isVisible()) {
-            bool skipDirtyFlag = true;
-            applyForeground(m_foregroundPath, skipDirtyFlag);
-        }
-    });
 }
 
 CardBoard::~CardBoard()
@@ -133,7 +126,7 @@ void CardBoard::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void CardBoard::applyForeground(const QString& path, bool skipDirtyFlag)
+void CardBoard::applyForeground(const QString& path)
 {
     m_foregroundPath = path;
 
@@ -145,9 +138,7 @@ void CardBoard::applyForeground(const QString& path, bool skipDirtyFlag)
 
     m_overlay->setVisible(true);
 
-    if (!skipDirtyFlag) {
-        __markDirty();
-    }
+    __markDirty();
 }
 
 void CardBoard::removeForeground()
