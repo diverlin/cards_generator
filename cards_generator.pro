@@ -2,8 +2,8 @@ QT += widgets
 
 HEADERS     = mainwindow.hpp \
               dragwidget.hpp \
-              draglistwidget.hpp \
-              card.hpp \
+              imagespoolwidget.hpp \
+              imagewidget.hpp \
               colors.hpp \
               utils.hpp \
 
@@ -11,9 +11,9 @@ RESOURCES   =
 
 SOURCES     = mainwindow.cpp \
               dragwidget.cpp \
-              draglistwidget.cpp \
+              imagespoolwidget.cpp \
               utils.cpp \
-              card.cpp \
+              imagewidget.cpp \
               colors.cpp \
               main.cpp
 

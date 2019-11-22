@@ -3,7 +3,7 @@
 #include <QWidget>
 
 class QLineEdit;
-class DragGridWidget;
+class ImagesPoolWidget;
 class DragWidget;
 
 class MainWindow : public QWidget {
@@ -14,14 +14,15 @@ public:
 
 private:
     QLineEdit* m_mediaPathEdit = nullptr;
-    DragGridWidget* m_leftBoard = nullptr;
+    ImagesPoolWidget* m_leftBoard = nullptr;
     DragWidget* m_rightBoard = nullptr;
 
     void __tryRestoreSession();
     QString __loadLibraryPath() const;
     void __saveLibraryPath(const QString&) const;
     void __reloadLibrary();
-    void __updatePathColor(QString&) const;
+    void __updatePathColor(const QString&) const;
     QList<QString> __getImageFiles(const QString& path) const;
+    void __processNewPath(const QString& pathCandidate);
 };
 

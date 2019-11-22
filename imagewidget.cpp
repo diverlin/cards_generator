@@ -1,20 +1,24 @@
-#include <card.hpp>
+#include <imagewidget.hpp>
 #include <QBitmap>
+#include <QVariant>
 
-Card::Card(const QString& imagePath, QWidget* parent)
+ImageWidget::ImageWidget(const QString& imagePath, QWidget* parent)
     :
       QLabel(parent)
     , m_imagePath(imagePath)
 {
     scale(1.0f);
+    setStyleSheet("border: 6px solid #505050; border-radius: 8px;");
+
+    setProperty("imagePath", imagePath);
 }
 
-Card::~Card()
+ImageWidget::~ImageWidget()
 {
 
 }
 
-void Card::scale(float factor)
+void ImageWidget::scale(float factor)
 {
     QPixmap pixmapOrig(m_imagePath);
     float ratio = pixmapOrig.width()/float(pixmapOrig.height());
@@ -23,12 +27,6 @@ void Card::scale(float factor)
     QPixmap pixmapMini = pixmapOrig.scaled(m_size);
     setPixmap(pixmapMini);
     setFixedSize(m_size);
-
-    applyMask();
 }
 
-void Card::applyMask()
-{
-    QPixmap mask("/workspace/projects/Qt_based/cards_generator/images/mask.png");
-    setMask(mask.scaled(m_size));
-}
+

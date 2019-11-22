@@ -50,36 +50,16 @@
 
 #include <QtWidgets>
 
-#include "dragwidget.h"
+#include "dragwidget.hpp"
+#include "imagewidget.hpp"
 
-//! [0]
 DragWidget::DragWidget(QWidget *parent)
     : QFrame(parent)
 {
     setMinimumSize(200, 200);
     setFrameStyle(QFrame::Sunken | QFrame::StyledPanel);
     setAcceptDrops(true);
-
-    QLabel *boatIcon = new QLabel(this);
-    boatIcon->setStyleSheet("QLabel {border-radius: 4px;}");
-    boatIcon->setPixmap(QPixmap(":/images/boat.png"));
-    boatIcon->move(10, 10);
-    boatIcon->show();
-    boatIcon->setAttribute(Qt::WA_DeleteOnClose);
-
-    QLabel *carIcon = new QLabel(this);
-    carIcon->setPixmap(QPixmap(":/images/car.png"));
-    carIcon->move(100, 10);
-    carIcon->show();
-    carIcon->setAttribute(Qt::WA_DeleteOnClose);
-
-    QLabel *houseIcon = new QLabel(this);
-    houseIcon->setPixmap(QPixmap(":/images/house.png"));
-    houseIcon->move(10, 80);
-    houseIcon->show();
-    houseIcon->setAttribute(Qt::WA_DeleteOnClose);
 }
-//! [0]
 
 void DragWidget::dragEnterEvent(QDragEnterEvent *event)
 {
@@ -115,11 +95,15 @@ void DragWidget::dropEvent(QDropEvent *event)
         QByteArray itemData = event->mimeData()->data("application/x-dnditemdata");
         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
 
+        qInfo() << event->source()->property("imagePath").toString();
+
         QPixmap pixmap;
         QPoint offset;
-        dataStream >> pixmap >> offset;
+        QString imagePath;
+        dataStream >> pixmap >> offset >> imagePath;
 
-        QLabel *newIcon = new QLabel(this);
+//        QString imagePath =
+        ImageWidget *newIcon = new ImageWidget(imagePath, this);
         newIcon->setPixmap(pixmap);
         newIcon->move(event->pos() - offset);
         newIcon->show();

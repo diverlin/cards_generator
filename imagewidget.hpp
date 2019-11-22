@@ -2,14 +2,13 @@
 
 #include <QLabel>
 
-class Card : public QLabel {
+class ImageWidget : public QLabel {
     Q_OBJECT
 public:
-    Card(const QString& imagePath, QWidget* parent = nullptr);
-    virtual ~Card();
+    ImageWidget(const QString& imagePath, QWidget* parent = nullptr);
+    virtual ~ImageWidget();
 
     void scale(float factor);
-    void applyMask();
 
 private:
     QSize m_size;

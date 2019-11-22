@@ -1,60 +1,11 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of the examples of the Qt Toolkit.
-**
-** $QT_BEGIN_LICENSE:BSD$
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** BSD License Usage
-** Alternatively, you may use this file under the terms of the BSD license
-** as follows:
-**
-** "Redistribution and use in source and binary forms, with or without
-** modification, are permitted provided that the following conditions are
-** met:
-**   * Redistributions of source code must retain the above copyright
-**     notice, this list of conditions and the following disclaimer.
-**   * Redistributions in binary form must reproduce the above copyright
-**     notice, this list of conditions and the following disclaimer in
-**     the documentation and/or other materials provided with the
-**     distribution.
-**   * Neither the name of The Qt Company Ltd nor the names of its
-**     contributors may be used to endorse or promote products derived
-**     from this software without specific prior written permission.
-**
-**
-** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-** "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE."
-**
-** $QT_END_LICENSE$
-**
-****************************************************************************/
-
 #include <mainwindow.hpp>
-#include "draglistwidget.hpp"
+#include "imagespoolwidget.hpp"
 #include "dragwidget.hpp"
 #include "colors.hpp"
 #include "utils.hpp"
 
 #include <QApplication>
+#include <QScrollArea>
 #include <QStyle>
 #include <QDesktopWidget>
 #include <QVBoxLayout>
@@ -68,19 +19,35 @@
 #include <QStandardPaths>
 #include <QSettings>
 #include <QDebug>
+#include <QFileDialog>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget* parent)
     : QWidget(parent)
 {
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    QHBoxLayout* mainLayout = new QHBoxLayout(this);
     compactLayout(mainLayout);
 
-    QWidget* wControl = new QWidget;
+    QWidget* wLeftPane = new QWidget;
+    QWidget* wRightPane = new QWidget;
 
-    QWidget* wBoard = new QWidget;
+    mainLayout->addWidget(wLeftPane);
+    mainLayout->addWidget(wRightPane);
 
-    QVBoxLayout* controlLayout = new QVBoxLayout(wControl);
-    compactLayout(controlLayout);
+    QVBoxLayout* leftPaneLayout = new QVBoxLayout(this);
+    QVBoxLayout* rightPaneLayout = new QVBoxLayout(this);
+
+    compactLayout(leftPaneLayout);
+    compactLayout(rightPaneLayout);
+
+    wLeftPane->setLayout(leftPaneLayout);
+    wRightPane->setLayout(rightPaneLayout);
+
+    QWidget* wLeftPaneControl = new QWidget;
+    QWidget* wRightPaneControl = new QWidget;
+
+    QVBoxLayout* leftPaneControlLayout = new QVBoxLayout(wLeftPaneControl);
+    compactLayout(leftPaneControlLayout);
 
     QWidget* wLibrary = new QWidget;
     QHBoxLayout* libraryLayout = new QHBoxLayout;
@@ -88,39 +55,49 @@ MainWindow::MainWindow(QWidget* parent)
     wLibrary->setLayout(libraryLayout);
 
     QLabel* lLibrary = new QLabel("Location to images:");
-    m_mediaPathEdit = new QLineEdit(wControl);
+    m_mediaPathEdit = new QLineEdit(wLeftPaneControl);
     QPushButton* bRefresh = new QPushButton("reload");
+    QPushButton* bOpen = new QPushButton("open");
 
-    //    connect(m_mediaPathEdit, &QLineEdit::textEdited, this, [this](){
-    //        qInfo()<<"m_mediaPathEdit"<<m_mediaPathEdit->text();
-    //    });
+//    connect(m_mediaPathEdit, &QLineEdit::textEdited, this, [this](){
+//        qInfo()<<"m_mediaPathEdit"<<m_mediaPathEdit->text();
+//    });
+
+    connect(bOpen, &QPushButton::clicked, this, [this](){
+        QString pathCandidate = QFileDialog::getExistingDirectory(this,
+                                                             tr("Open Images Location"),
+                                                             __loadLibraryPath());
+        __processNewPath(pathCandidate);
+    });
 
     connect(bRefresh, &QPushButton::clicked, this, [this](){
         QString pathCandidate = m_mediaPathEdit->text();
-        __updatePathColor(pathCandidate);
-        if (QFileInfo(pathCandidate).exists()) {
-            __saveLibraryPath(pathCandidate);
-            __reloadLibrary();
-        }
+       __processNewPath(pathCandidate);
     });
 
     libraryLayout->addWidget(lLibrary);
     libraryLayout->addWidget(m_mediaPathEdit);
+    libraryLayout->addWidget(bOpen);
     libraryLayout->addWidget(bRefresh);
 
-    controlLayout->addWidget(wLibrary);
+    leftPaneControlLayout->addWidget(wLibrary);
 
-    QHBoxLayout* boardLayout = new QHBoxLayout(wBoard);
-    compactLayout(boardLayout);
+    // controlRightLayout
+    QVBoxLayout* controlRightLayout = new QVBoxLayout(wRightPaneControl);
+    compactLayout(controlRightLayout);
 
-    m_leftBoard = new DragGridWidget;
+    m_leftBoard = new ImagesPoolWidget;
     m_rightBoard = new DragWidget;
 
-    boardLayout->addWidget(m_leftBoard);
-    boardLayout->addWidget(m_rightBoard);
+    QScrollArea* scrollArea = new QScrollArea(this);
+    scrollArea->setBackgroundRole(QPalette::Dark);
+    scrollArea->setWidget(m_leftBoard);
 
-    mainLayout->addWidget(wControl);
-    mainLayout->addWidget(wBoard);
+    leftPaneLayout->addWidget(wLeftPaneControl);
+    leftPaneLayout->addWidget(scrollArea);
+
+    rightPaneLayout->addWidget(wRightPaneControl);
+    rightPaneLayout->addWidget(m_rightBoard);
 
     resize(QDesktopWidget().availableGeometry(this).size() * 0.8);
 
@@ -135,14 +112,34 @@ MainWindow::MainWindow(QWidget* parent)
 
     setWindowTitle(tr("Cards Generator"));
 
-    mainLayout->setStretch(0,0);
+    leftPaneLayout->setStretch(0,0);
+    leftPaneLayout->setStretch(1,1);
+
+    rightPaneLayout->setStretch(0,0);
+    rightPaneLayout->setStretch(1,1);
+
+    mainLayout->setStretch(0,1);
     mainLayout->setStretch(1,1);
 
+    show();
     __tryRestoreSession();
 }
 
 MainWindow::~MainWindow()
 {}
+
+
+void MainWindow::__processNewPath(const QString& pathCandidate)
+{
+    __updatePathColor(pathCandidate);
+    if (QFileInfo(pathCandidate).exists()) {
+        if (m_mediaPathEdit->text() != pathCandidate) {
+            m_mediaPathEdit->setText(pathCandidate);
+        }
+        __saveLibraryPath(pathCandidate);
+        __reloadLibrary();
+    }
+}
 
 QString MainWindow::__loadLibraryPath() const
 {
@@ -183,7 +180,7 @@ void MainWindow::__reloadLibrary()
     m_leftBoard->fill(files);
 }
 
-void MainWindow::__updatePathColor(QString& path) const
+void MainWindow::__updatePathColor(const QString& path) const
 {
     if (QFileInfo(path).exists()) {
         m_mediaPathEdit->setStyleSheet(QString("background: %1;").arg(COLOR_GREEN.name()));
@@ -200,6 +197,7 @@ MainWindow::__getImageFiles(const QString& path) const
     QStringList filters;
     filters << "*.png";
     filters << "*.jpg";
+    filters << "*.bmp";
 
     QDirIterator it(path, filters, QDir::AllEntries | QDir::NoSymLinks | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
     while (it.hasNext()) {

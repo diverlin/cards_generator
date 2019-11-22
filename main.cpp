@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setApplicationName("CardsGenerator");
 
-    MainWindow* window = new MainWindow;
-    window->show();
+    MainWindow window;
+    window.show();
 
     return app.exec();
 }
